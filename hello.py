@@ -33,7 +33,17 @@ def index():
     if form.validate_on_submit():
         old_name = session.get('name')
         if old_name is not None and old_name != form.name.data:
-            flash('Looks like you have changed your name!')
+            flash('Parece que você mudou seu nome!')
+        
         session['name'] = form.name.data
+        
+        # Enviar e-mail quando um novo nome é cadastrado
+        send_email(
+            to=["flaskaulasweb@zohomail.com", "seu_email@seudominio.com"],
+            subject="Novo usuário cadastrado",
+            body=f"Um novo usuário chamado {form.name.data} foi cadastrado."
+        )
+        
         return redirect(url_for('index'))
+    
     return render_template('index.html', form=form, name=session.get('name'))
