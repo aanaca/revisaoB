@@ -4,6 +4,14 @@ from flask_moment import Moment
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
+import requests
+import os
+
+
+# Configurações do Mailgun
+app.config['MAILGUN_API_KEY'] = os.environ.get('MAILGUN_API_KEY')
+app.config['MAILGUN_DOMAIN'] = os.environ.get('MAILGUN_DOMAIN')
+app.config['MAILGUN_FROM_EMAIL'] = 'seu_email@seudominio.com'  # Email que enviará as mensagens
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
@@ -27,6 +35,15 @@ def internal_server_error(e):
     return render_template('500.html'), 500
 
 
+def send_email(to, subject, body):
+    return requests.post(
+        f"https://api.mailgun.net/v3/{app.config['MAILGUN_DOMAIN']}/messages",
+        auth=("api", app.config['MAILGUN_API_KEY']),
+        data={"from": app.config['MAILGUN_FROM_EMAIL'],
+              "to": to,
+              "subject": subject,
+              "text": body})
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     form = NameForm()
@@ -39,7 +56,7 @@ def index():
         
         # Enviar e-mail quando um novo nome é cadastrado
         send_email(
-            to=["flaskaulasweb@zohomail.com", "seu_email@seudominio.com"],
+            to=["ana.caroline2@ifsp.edu.br"],
             subject="Novo usuário cadastrado",
             body=f"Um novo usuário chamado {form.name.data} foi cadastrado."
         )
